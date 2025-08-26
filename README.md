@@ -15,4 +15,4 @@ This is a toy CLI tool to learn about gerrymandering of congressional districts 
 All statistics & scoring is from [Princeton Gerrymandering Project](https://gerrymander.princeton.edu/).
 
 ## Example output
-![img/example_output.png]
+![example_output](img/example_output.png)
