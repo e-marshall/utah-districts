@@ -14,5 +14,7 @@ This is a toy CLI tool to learn about gerrymandering of congressional districts 
 
 All statistics & scoring is from [Princeton Gerrymandering Project](https://gerrymander.princeton.edu/).
 
+`proposed` refers to map proposed by the Independent Redistricting Commission in 2021. `enacted` refers to maps enacted by legislature, instead of those proposed by commission, in 2021. 
+
 ## Example output
 ![example_output](img/example_output.png)
