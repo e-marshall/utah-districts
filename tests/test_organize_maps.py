@@ -15,5 +15,4 @@ def test_maps():
         state="Utah",
         mtype="enacted",
         map_name = "enacted",
-        map_p
     )
