@@ -1,5 +1,5 @@
 [project]
-name = "utah-bb"
+name = "utah-districts"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.scripts]
-utah-bb = "utah_bb.cli:main"
+utah-districts = "utah_districts.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.8.11,<0.9.0"]
@@ -25,4 +25,5 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
 ]

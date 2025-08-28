@@ -3,6 +3,7 @@ import geopandas as gpd
 from shapely.geometry import shape
 import pandas as pd
 import matplotlib.pyplot as plt
+from enum import Enum
 
 def create_map_unit(state:str, mtype:str) -> None:
     "This script creates an instance of the MapUnit class corresponding to <state> and <map_type>."
@@ -23,7 +24,7 @@ def create_map_unit(state:str, mtype:str) -> None:
                   map_path = map_path,
                   score_path = score_path)
     return obj
-
+    
 class MapUnit:
     """This is the general class to hold data about each type of congressional district map (enacted and different draft versions).
     To create an instance, pass:
