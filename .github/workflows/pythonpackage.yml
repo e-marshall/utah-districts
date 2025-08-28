@@ -41,7 +41,7 @@ jobs:
 
       - name: Test with pytest
         run: |
-          uv run pytest -vv --cov-report term-missing --cov-report xml --cov utah-districts
+          uv run pytest -vv --cov-report term-missing --cov-report xml --cov utah_districts
 
       #- name: Upload coverage to Codecov
       #  uses: codecov/codecov-action@v5
