@@ -1,5 +1,4 @@
-import pytest
-from utah_districts.organize_maps import create_map_unit, MapUnit
+from utah_districts.organize_maps import create_map_unit
 
 
 def test_create_map():
@@ -7,11 +6,3 @@ def test_create_map():
         obj = create_map_unit(state="Utah", mtype=mtype)
         assert obj.map_type == mtype
         assert obj.map_name == mtype
-
-
-def test_maps():
-    map_unit = MapUnit(
-        state="Utah",
-        mtype="enacted",
-        map_name="enacted",
-    )

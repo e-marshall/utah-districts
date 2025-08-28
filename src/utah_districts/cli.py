@@ -1,7 +1,7 @@
 import click
 import numpy as np
 
-from utah_districts.organize_maps import MapUnit, create_map_unit
+from utah_districts.organize_maps import create_map_unit
 
 
 @click.group()
