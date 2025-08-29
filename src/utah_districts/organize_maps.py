@@ -1,121 +1,169 @@
-import geopandas as gpd
-
-# from shapely.geometry import shape
 import pandas as pd
-
-# import matplotlib.pyplot as plt
 from dataclasses import dataclass
-from typing import Literal
-from enum import Enum
+from typing import Type
 
-
-def create_score_obj(state: str, mtype: str) -> None:
-    maptype = MapType
-
-
-def create_map_unit(state: str, mtype: str) -> None:
-    "This script creates an instance of the MapUnit class corresponding to <state> and <map_type>."
-
-    if mtype == "proposed":
-        map_name = "proposed"
-        map_path = "../data/orange_3/UT-C21Dist-O3.geojson"
-        score_path = "https://redistricting-report-card.s3.amazonaws.com/UT/congressional/2020-census/results/plan-scores/UT-C21Dist-O3.json"
-
-    elif mtype == "enacted":
-        map_name = "enacted"
-        map_path = ("../data/enacted/UT-Utah-congressional-DRA.geojson",)
-        score_path = "https://redistricting-report-card.s3.amazonaws.com/UT/congressional/2020-census/results/plan-report-cards/UT-Utah-congressional-DRA-report-card.json"
-
-    obj = MapUnit(
-        state=state,
-        mtype=mtype,
-        map_name=map_name,
-        map_path=map_path,
-        score_path=score_path,
-    )
-    return obj
-
-
-class MapType(str, Enum):
-    """Class to hold attr of whether a map unit obj is enacted or proposed"""
-
-    ENACTED = "enacted"
-    PROPOSED = "proposed"
-
-
-class DataType(str, Enum):
-    """Class to hold attr of whether a data component is map or score"""
-
-    MAP = "map"
-    SCORE = "score"
-
-
+### ----- Data layer ----- ###
+#--------- These communicate to the 'database' ---------#
+# Will hold readers/paths? 
+# Will also hold df so that only the data needed in the domain model is there? 
 @dataclass
-class UnitParams:
-    """Class to hold input params used to define a Map and Score objs."""
-
-    state: str
-    map_type: MapType
-    data_path: str
-    data_type: DataType
-
-
-class Map:
-    def __init__(self, unit_params: UnitParams):
-        self.state = unit_params.state
-        self.map_type = unit_params.map_type
-        self.map_path = unit_params.data_path
-        self._map_gdf = None
+class EnactedMapReader:
+    """This class would be in the 'database layer'? or interface?
+    It knows the path that points to the enacted map json and reads it into memory
+    """
+    path: str
+    _df = None
 
     @property
-    def map_gdf(self):
-        if self._map_gdf is None:
-            self._map_gdf = self.create_map()
-        return self._map_gdf
+    def df(self):
+        if self._df is None:
+            self._df = self.read_df()
+        return self._df
 
-    def create_map(self):
-        print("here")
-        map_gdf = gpd.read_file(self.map_path)
-        return map_gdf
-
-
-class Score:
-    def __init__(self, unit_params: UnitParams):
-        self.state = unit_params.state
-        self.map_type = unit_params.map_type
-        self.score_path = unit_params.data_path
-        self._score_df = None
-        self._final_score = None
+    def read_df(self):
+        df = pd.read_json(self.path)
+        return 
+@dataclass
+class ProposedMapReader:
+    """This class would be in the 'database layer'? or interface?
+    It knows the path that points to the enacted map json and reads it into memory
+    """
+    path:str 
+    _df= None
 
     @property
-    def score_df(self):
-        if self._score_df is None:
-            self._score_df = self.read_score_df()
-        return self._score_df
+    def df(self):
+        if self._df is None:
+            self._df = self.read_df()
+        return self._df
 
-    def read_score_df(self):
-        score_df = pd.read_json(self.score_path)
-        return score_df
+    def read_df(self):
+        df = pd.read_json(self.path)
+        return df
 
-    @property
-    def final_score(self):
-        if self._final_score is None:
-            self._final_score = self.get_final_score()
-        return self._final_score
+def make_both_readers(enacted_reader = EnactedMapReader,
+                      proposed_reader = ProposedMapReader):
+    """This function reads the paths to 2 json files and returns two Reader objs"""
 
-    def get_final_score(self):
-        score_df = self.score_df
-        if self.map_type == "enacted":
-            # if 'finalReportCardGrade' in score_df.columns:
-            final_score = score_df.loc["finalReportCardGrade"]["report_card"]
-        else:
-            raise NotImplementedError("Scores only available for enacted maps.")
-        return final_score
+    enacted_df_path = "https://redistricting-report-card.s3.amazonaws.com/UT/congressional/2020-census/results/plan-report-cards/UT-Utah-congressional-DRA-report-card.json"
+    proposed_df_path ="https://redistricting-report-card.s3.amazonaws.com/UT/congressional/2020-census/results/plan-scores/UT-C21Dist-O3.json"
+
+    enacted = enacted_reader(path = enacted_df_path)
+    assert isinstance(enacted, EnactedMapReader), 'enacted_reader not an EnactedReader'
+    proposed = proposed_reader(path = proposed_df_path)
+
+    return (enacted, proposed)
+
+#--------- These are the components of the data model ---------#    
+class EnactedMapRepository:
+    """This class holds the data about the enacted map that is relevant to the domain.
+    It communicates with the reader, which holds the full df"""
+    def __init__(self, reader: EnactedMapReader):
+        assert isinstance(reader, EnactedMapReader), f'reader obj, expected: EnactedMapReader, received: {type(reader)}.'
+        assert isinstance(reader.df, pd.DataFrame), f'Expected: EnactedMapReader, received: {type(reader)}'
+        self.df = reader.df
+        self.calc_score()
+        self.calc_compactness()
+
+    def calc_score(self):
+        """graded score for the enacted map"""
+
+        expected_col = "finalReportCardGrade"
+        assert expected_col in self.df.columns, f'{expected_col} not in df.columns'
+
+        final_score = self.df.loc[expected_col]["report_card"]
+
+        self.score =  final_score
+    
+    def calc_compactness(self):
+        """Compactness score for either map (should maybe structure these classes differently)"""
+
+        expected_col = "plan"
+        expected_idx = "avgReock"
+
+        assert expected_col in self.df, f'{expected_col} not in df.columns'
+
+        avg_reock = self.df.loc[expected_idx][expected_idx]
+        self.compactness = avg_reock
+        
+class ProposedMapRepository:
+    """This class holds the data about the enacted map that is relevant to the domain.
+    It communicates with the reader, which holds the full df"""
+    def __init__(self, reader: ProposedMapReader):
+
+        self.df = reader.df
+        self._score = None
+        self._compactness = None
+
+        @property
+        def score(self):
+            """graded score for the enacted map"""
+            if self._score is None:
+                self._score = self.get_score()
+            return self._score
+        
+        def get_score(self):
+            """Get the graded score for the enacted map"""
+            expected_col = "finalReportCardGrade"
+            assert expected_col in self.df.columns, f'{expected_col} not in df.columns'
+
+            final_score = self.df.loc[expected_col]["report_card"]
+
+            return final_score
+        
+        @property
+        def compactness(self):
+            """Compactness score for either map (should maybe structure these classes differently)"""
+            if self._compactness is None:
+                self._compactness = self.get_copmactness()
+            return self._compactness
+        
+        def get_compactness(self):
+            """Get the compactness score for the map"""
+            expected_col = "plan"
+            expected_idx = "avgReock"
+
+            assert expected_col in self.df, f'{expected_col} not in df.columns'
+
+            avg_reock = self.df.loc[expected_idx][expected_idx]
+            return avg_reock
+        
+### ----- Domain layer ----- ###
+@dataclass
+class StateData:
+    name: str
+    enacted_map: EnactedMapRepository  
+    proposed_map: ProposedMapRepository
+    #score = EnactedMapRepository.score
+
+    def get_enacted_compactness(self):
+        print('enacted map compactness: ', self.enacted_map.compactness)
+    def compare_compactness(self): 
+        self.compactness_diff = self.proposed_map.compactness - self.enacted_map.compactness
 
 
-class DistrictMapUnit:
-    def __init__(self, map_obj, score_obj):
-        self.state = map_obj.state
-        self.map_type = map_obj.map_type
-        self.map_gdf = map_obj.map_gdf
-        self.score_df = score_obj.score_df
+def make_both_repos():
+    """This method """
+
+    enacted_reader, proposed_reader = make_both_readers()
+    assert isinstance(enacted_reader, EnactedMapReader), 'Problem'
+    enacted_repo = EnactedMapRepository(enacted_reader)
+    proposed_repo = ProposedMapRepository(proposed_reader)
+
+    return (enacted_repo, proposed_repo)
+
+def make_state_data_obj(name:str = "Utah"):
+
+    #make repos
+    enacted_repo, proposed_repo = make_both_repos()
+
+    #then, make state data
+    state_data = StateData(name,enacted_repo, proposed_repo)
+
+    return state_data
+
+def test_compare_compactness_returns_correct_diff():
+
+    state_data = make_state_data_obj() 
+    return state_data
+

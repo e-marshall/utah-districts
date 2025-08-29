@@ -9,10 +9,8 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "click>=8.2.1",
-    "geopandas>=1.1.1",
     "jupyter>=1.1.1",
-    "matplotlib>=3.10.5",
-    "shapely>=2.1.1",
+    "pandas>=2.3.2",
 ]
 
 [project.scripts]
@@ -26,4 +24,10 @@ build-backend = "uv_build"
 dev = [
     "pytest>=8.4.1",
     "pytest-cov>=6.2.1",
+    "ruff>=0.12.11",
+]
+
+[tool.ruff]
+exclude = [
+    "nbs/"
 ]
