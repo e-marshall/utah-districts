@@ -6,40 +6,29 @@ from typing import Type
 #--------- These communicate to the 'database' ---------#
 # Will hold readers/paths? 
 # Will also hold df so that only the data needed in the domain model is there? 
-@dataclass
 class EnactedMapReader:
     """This class would be in the 'database layer'? or interface?
     It knows the path that points to the enacted map json and reads it into memory
     """
-    path: str
-    _df = None
-
-    @property
-    def df(self):
-        if self._df is None:
-            self._df = self.read_df()
-        return self._df
+    def __init__(self, path:str):
+        self.path = path
+        self.read_df()
 
     def read_df(self):
-        df = pd.read_json(self.path)
-        return 
-@dataclass
+
+        self.df = pd.read_json(self.path)
+
 class ProposedMapReader:
     """This class would be in the 'database layer'? or interface?
     It knows the path that points to the enacted map json and reads it into memory
     """
-    path:str 
-    _df= None
-
-    @property
-    def df(self):
-        if self._df is None:
-            self._df = self.read_df()
-        return self._df
+    def __init__(self, path):
+        self.path = path
+        self.read_df()
 
     def read_df(self):
-        df = pd.read_json(self.path)
-        return df
+
+        self.df = pd.read_json(self.path)
 
 def make_both_readers(enacted_reader = EnactedMapReader,
                       proposed_reader = ProposedMapReader):

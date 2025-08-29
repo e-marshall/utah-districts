@@ -49,13 +49,13 @@ def see_compactness(state: str, mtype: str):
     click.echo(text)
 
 
-@main.command("compare-compactness")
-@click.option(
-    "--state",
-    # prompt = 'Enter a state',
-    default="Utah",
-    help="Choose one of the U.S. states to see its gerrymander score",
-)
+#@main.command("compare-compactness")
+#@click.option(
+#    "--state",
+#    # prompt = 'Enter a state',
+#    default="Utah",
+#    help="Choose one of the U.S. states to see its gerrymander score",
+#)
 
 #def compare_proposed_enacted(state: str):
 #    enacted_map = create_map_unit(state, "enacted")
